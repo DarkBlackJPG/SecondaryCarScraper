@@ -1,0 +1,7 @@
+numpy
+scikit-learn
+pandas
+scrapy
+scrapy-rotating-proxies
+psycopg2
+beautifulsoup4
