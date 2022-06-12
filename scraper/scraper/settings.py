@@ -30,17 +30,8 @@ ROBOTSTXT_OBEY = True
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
 
-# Retry many times since proxies often fail
-RETRY_TIMES = 15
-# Retry on most error codes since proxies fail for different reasons
-RETRY_HTTP_CODES = [500, 503, 504, 400, 403, 404, 408, 429]
-
 # Proxy list
-ROTATING_PROXY_LIST_PATH = 'C:/Users/stefa/OneDrive/Desktop/psz-project/scraper/scraper/proxy_list.txt'
-
-# Proxy mode
-# 0 = Every requests have different proxy
-PROXY_MODE = 0
+# ROTATING_PROXY_LIST_PATH = 'C:/Users/stefa/OneDrive/Desktop/psz-project/scraper/scraper/proxy_list.txt'
 
 # Disable cookies (enabled by default)
 #COOKIES_ENABLED = False
@@ -64,8 +55,8 @@ PROXY_MODE = 0
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
     'scraper.middlewares.ScraperDownloaderMiddleware': 543,
-    'rotating_proxies.middlewares.RotatingProxyMiddleware': 610,
-    'rotating_proxies.middlewares.BanDetectionMiddleware': 620,
+    #'rotating_proxies.middlewares.RotatingProxyMiddleware': 610,
+    #'rotating_proxies.middlewares.BanDetectionMiddleware': 620,
 }
 
 # Enable or disable extensions
