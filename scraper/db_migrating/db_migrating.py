@@ -1,6 +1,13 @@
 import psycopg2
 import pandas as pd
-import numpy
+import re
+from sqlalchemy import create_engine
+
+# establish connections
+conn_string = 'postgresql://postgres:123@127.0.0.1/polovniautomobili'
+
+db = create_engine(conn_string)
+sqlalchemy_conn = db.connect()
 
 conn = psycopg2.connect("dbname=polovniautomobili user=postgres password=123")
 cur = conn.cursor()
@@ -36,15 +43,15 @@ execute_insert('naziv', 'boja', boja_enterijer)
 execute_insert('naziv', 'emisiona_klasa', emisiona_klasa)
 execute_insert('naziv', 'gorivo', gorivo)
 execute_insert('naziv', 'grad', grad)
-execute_insert('opis', 'karoserija', karoserija)
-execute_insert('opis', 'klima', klima)
+execute_insert('opis',  'karoserija', karoserija)
+execute_insert('opis',  'klima', klima)
 execute_insert('naziv', 'materijal', materijal_enterijera)
-execute_insert('opis', 'menjac', menjac)
-execute_insert('opis', 'ostecenje', ostecenje)
-execute_insert('opis', 'pogon', pogon)
-execute_insert('opis', 'poreklo', poreklo_vozila)
-execute_insert('opis', 'stanje', stanje)
-execute_insert('opis', 'vlasnistvo', vlasnistvo)
+execute_insert('opis',  'menjac', menjac)
+execute_insert('opis',  'ostecenje', ostecenje)
+execute_insert('opis',  'pogon', pogon)
+execute_insert('opis',  'poreklo', poreklo_vozila)
+execute_insert('opis',  'stanje', stanje)
+execute_insert('opis',  'vlasnistvo', vlasnistvo)
 execute_insert('naziv', 'zemlja_uvoza', zemlja_uvoza)
 execute_insert('naziv', 'marka', marka)
 
@@ -57,7 +64,71 @@ for model_name, manufacturers in model.iterrows():
         cur.execute("""
         INSERT INTO public.model (marka, naziv) VALUES ( (SELECT id FROM public.marka WHERE naziv = %(marka)s), %(model)s) ON CONFLICT DO NOTHING
         """, {'marka': manufacturer, 'model': model_name})
-
 conn.commit() # <- We MUST commit to reflect the inserted data
+
+# Populating with all cars
+
+def fetch_id_value_tuple(table_name):
+    cur.execute('SELECT * FROM public.'+table_name)
+    return cur.fetchall()
+
+def update_dataframe_with_ids(dataframe, column_name, id_tuple, value_index = 1):
+    for tuple in id_tuple:
+        dataframe[column_name] = dataframe[column_name].replace(tuple[value_index], tuple[0])
+    return dataframe
+
+boja_tuple = fetch_id_value_tuple('boja')
+emisiona_klasa_tuple = fetch_id_value_tuple('emisiona_klasa')
+gorivo_tuple = fetch_id_value_tuple('gorivo')
+grad_tuple = fetch_id_value_tuple('grad')
+karoserija_tuple = fetch_id_value_tuple('karoserija')
+klima_tuple = fetch_id_value_tuple('klima')
+marka_tuple = fetch_id_value_tuple('marka')
+materijal_enterijera_tuple = fetch_id_value_tuple('materijal')
+menjac_tuple = fetch_id_value_tuple('menjac')
+model_tuple = fetch_id_value_tuple('model')
+ostecenje_tuple = fetch_id_value_tuple('ostecenje')
+pogon_tuple = fetch_id_value_tuple('pogon')
+poreklo_vozila_tuple = fetch_id_value_tuple('poreklo')
+stanje_tuple = fetch_id_value_tuple('stanje')
+vlasnistvo_tuple = fetch_id_value_tuple('vlasnistvo')
+zemlja_uvoza_tuple = fetch_id_value_tuple('zemlja_uvoza')
+
+csv_file = update_dataframe_with_ids(csv_file, 'boja_eksterijer',   boja_tuple)
+csv_file = update_dataframe_with_ids(csv_file, 'boja_enterijer',   boja_tuple)
+csv_file = update_dataframe_with_ids(csv_file, 'emisiona_klasa',    emisiona_klasa_tuple)
+csv_file = update_dataframe_with_ids(csv_file, 'gorivo',   gorivo_tuple)
+csv_file = update_dataframe_with_ids(csv_file, 'grad',    grad_tuple)
+csv_file = update_dataframe_with_ids(csv_file, 'karoserija',   karoserija_tuple)
+csv_file = update_dataframe_with_ids(csv_file, 'klima',    klima_tuple)
+csv_file = update_dataframe_with_ids(csv_file, 'marka',   marka_tuple)
+csv_file = update_dataframe_with_ids(csv_file, 'materijal_enterijera',    materijal_enterijera_tuple)
+csv_file = update_dataframe_with_ids(csv_file, 'menjac',    menjac_tuple)
+csv_file = update_dataframe_with_ids(csv_file, 'model',    model_tuple, 2)
+csv_file = update_dataframe_with_ids(csv_file, 'ostecenje',   ostecenje_tuple)
+csv_file = update_dataframe_with_ids(csv_file, 'pogon',    pogon_tuple)
+csv_file = update_dataframe_with_ids(csv_file, 'poreklo_vozila',    poreklo_vozila_tuple)
+csv_file = update_dataframe_with_ids(csv_file, 'stanje',    stanje_tuple)
+csv_file = update_dataframe_with_ids(csv_file, 'vlasnistvo',    vlasnistvo_tuple)
+csv_file = update_dataframe_with_ids(csv_file, 'zemlja_uvoza',    zemlja_uvoza_tuple)
+
+only_numbers_regex = r'([0-9\.]+)'
+csv_file['fiksna_cena'] = csv_file['fiksna_cena'].replace('NE', 0).replace('DA', 1)
+csv_file['zamena'] = csv_file['zamena'].replace('NE', 0).replace('DA', 1)
+csv_file['snaga_ks'] = 0
+csv_file['snaga_kw'] = 0
+csv_file['broj_sedista'] = csv_file['broj_sedista'].map(lambda x: x[0])
+csv_file['broj_vrata'] = csv_file['broj_vrata'].map(lambda x: x[0])
+csv_file['snaga_kw'] = csv_file['snaga'].map(lambda x: re.findall(only_numbers_regex, x)[0])
+csv_file['snaga_ks'] = csv_file['snaga'].map(lambda x: re.findall(only_numbers_regex, x)[1])
+csv_file['registrovan_do'] = csv_file['registrovan_do'].map(lambda x: x if x != 'Nije registrovan' else float('nan'))
+
+
+del csv_file['snaga']
+
+print(csv_file.head(15).to_string())
+
+csv_file.to_sql('automobili', sqlalchemy_conn, if_exists='replace')
+
 cur.close()
 conn.close()

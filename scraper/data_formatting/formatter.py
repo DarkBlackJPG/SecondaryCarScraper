@@ -20,13 +20,6 @@ def format_data():
     #csv_file.to_csv('../polovni_automobili_database_20220612-152247_removed_newlines.csv', index=False)
     csv_file = pd.read_csv('../polovni_automobili_database_20220612-152247_removed_newlines.csv')
 
-    for idx, row in csv_file.iterrows():
-        if idx == 2:
-            break
-        print(row)
-        print('==================')
-
-
     cena_popust = csv_file['cena_popust']
     cena_regularna = csv_file['cena_regularna']
     kilometraza = csv_file['kilometraza']
@@ -36,6 +29,12 @@ def format_data():
     csv_file['cena_regularna'] = cena_regularna.apply(lambda x: extract_number(x))
     csv_file['kilometraza'] = kilometraza.apply(lambda x: extract_number(x))
     csv_file['kubikaza'] = kubikaza.apply(lambda x: extract_number(x))
+
+    for idx, row in csv_file.iterrows():
+        if idx == 2:
+            break
+        print(row)
+        print('==================')
 
     csv_file.to_csv('../polovni_automobili_database_20220612-152247_formatted_data.csv', index=False)
 
