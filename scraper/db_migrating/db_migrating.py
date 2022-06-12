@@ -128,7 +128,7 @@ del csv_file['snaga']
 
 print(csv_file.head(15).to_string())
 
-csv_file.to_sql('automobili', sqlalchemy_conn, if_exists='replace')
+csv_file.to_sql('automobili', sqlalchemy_conn, if_exists='append')
 
 cur.close()
 conn.close()
