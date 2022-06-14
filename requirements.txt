@@ -8,3 +8,5 @@ beautifulsoup4
 sqlalchemy
 python-docx
 matplotlib
+flask
+flask-cors

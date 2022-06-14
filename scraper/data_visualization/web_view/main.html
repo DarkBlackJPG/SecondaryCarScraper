@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js@3.8.0/dist/chart.min.js"></script>
+        <title>Document</title>
+    </head>
+    <body>
+        <button onclick="a()">Top 10 gradova</button>
+        <button onclick="b()">Broj automobila po kilometrazi</button>
+        <button onclick="c()">Broj automobila po godini proizvodnje</button>
+        <button onclick="d()">Broj i procenat automobila sa manuelnim ili automatskim menjacem</button>
+        <button onclick="e()">Broj i procenat svih automobila po ceni</button>
+        <div style="position:absolute; top:60px; left:10px; width:500px; height:500px;">
+            <canvas id="bar_chart"  height="100"></canvas>
+            <canvas id="pie_chart"  height="100"></canvas>
+        </div>
+
+        <script>
+            function getRandomColor() {
+                var letters = '0123456789ABCDEF'.split('');
+                var color = '#';
+                for (var i = 0; i < 6; i++ ) {
+                    color += Math.floor(Math.random() * 16)
+                }
+                return 'rgba('+Math.floor(Math.random() * 256)+', '+Math.floor(Math.random() * 256)+', '+Math.floor(Math.random() * 256)+', 0.2)';
+            }
+            let current_instance_bar = null
+            let current_instance_pie = null
+            function a() {
+                var xhttp;
+                xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        data = JSON.parse(xhttp.responseText);
+                        labels = []
+                        values = []
+                        colors = []
+                        for (let i = 0; i < data.length; i++){
+                            labels.push(data[i][0])
+                            values.push(data[i][1]);
+                            colors.push(getRandomColor())
+                        }
+                        const ctx2 = document.getElementById("bar_chart").getContext("2d");
+                        ctx2.canvas.width = 50;
+                        ctx2.canvas.height = 50;
+                        if (current_instance_bar)
+                            current_instance_bar.destroy()
+                        if (current_instance_pie)
+                            current_instance_pie.destroy()
+
+                        current_instance_bar = new Chart(ctx2, {
+                            type: "bar",
+                            responsive: true,
+                            data: {
+                                labels: labels,
+                                datasets: [
+                                    {
+                                        label: "Broj automobila u gradu",
+                                        data: values,
+                                        backgroundColor: colors,
+                                        borderColor: colors,
+                                        borderWidth: 1,
+                                    },
+                                ],
+                            },
+                        });
+                    }
+                };
+                xhttp.open("GET", "http://127.0.0.1:5000/top_10_results", true);
+                xhttp.send();
+            }
+
+            function b() {
+                var xhttp;
+                xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        data = JSON.parse(xhttp.responseText);
+                        labels = []
+                        values = []
+                        colors = []
+                        for (let i = 0; i < data.length; i++){
+                            labels.push(data[i][0]);
+                            colors.push(getRandomColor())
+                            values.push(data[i][1])
+                        }
+                        const ctx2 = document.getElementById("bar_chart").getContext("2d");
+                        ctx2.canvas.width = 50;
+                        ctx2.canvas.height = 50;
+
+                        if (current_instance_bar)
+                            current_instance_bar.destroy()
+                        if (current_instance_pie)
+                            current_instance_pie.destroy()
+
+                        current_instance_bar = new Chart(ctx2, {
+                            type: "bar",
+                            responsive: true,
+                            data: {
+                                labels: labels,
+                                datasets: [
+                                    {
+                                        label: "Broj automobila u gradu",
+                                        data: values,
+                                        borderWidth: 1,
+                                        backgroundColor: colors,
+                                        borderColor: colors,
+                                    },
+                                ],
+                            },
+                        });
+                    }
+                };
+                xhttp.open("GET", "http://127.0.0.1:5000/grouped_by_km_results", true);
+                xhttp.send();
+            }
+
+            function c() {
+                 var xhttp;
+                xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        data = JSON.parse(xhttp.responseText);
+                        labels = []
+                        values = []
+                        colors = []
+                        for (let i = 0; i < data.length; i++){
+                            labels.push(data[i][0])
+                            colors.push(getRandomColor())
+                            values.push(data[i][1])
+                        }
+                        const ctx2 = document.getElementById("bar_chart").getContext("2d");
+                        ctx2.canvas.width = 50;
+                        ctx2.canvas.height = 50;
+
+                        if (current_instance_bar)
+                            current_instance_bar.destroy()
+                        if (current_instance_pie)
+                            current_instance_pie.destroy()
+
+                        current_instance_bar = new Chart(ctx2, {
+                            type: "bar",
+                            responsive: true,
+                            data: {
+                                labels: labels,
+                                datasets: [
+                                    {
+                                        label: "Broj automobila po godini",
+                                        data: values,
+                                        backgroundColor: colors,
+                                        borderColor: colors,
+                                        borderWidth: 1,
+                                    },
+                                ],
+                            },
+                        });
+                    }
+                };
+                xhttp.open("GET", "http://127.0.0.1:5000/grouped_by_year_results", true);
+                xhttp.send();
+            }
+
+            function d() {
+                 var xhttp;
+                xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        data = JSON.parse(xhttp.responseText);
+                        labels = []
+                        values_percents = []
+                        values_nums = []
+                        colors = []
+                        for (let i = 0; i < data.length; i++){
+                            labels.push(data[i][0])
+                            colors.push(getRandomColor())
+                            values_percents.push(data[i][1])
+                            values_nums.push(data[i][2])
+                        }
+                        const ctx1 = document.getElementById("pie_chart").getContext("2d");
+                        ctx1.canvas.width = 50;
+                        ctx1.canvas.height = 50;
+
+                        const ctx2 = document.getElementById("bar_chart").getContext("2d");
+                        ctx2.canvas.width = 50;
+                        ctx2.canvas.height = 50;
+
+                        if (current_instance_bar)
+                            current_instance_bar.destroy()
+                        if (current_instance_pie)
+                            current_instance_pie.destroy()
+                        current_instance_pie = new Chart(ctx1, {
+                            type: "pie",
+                            responsive: true,
+                            data: {
+                                labels: labels,
+                                datasets: [
+                                    {
+                                        label: "Procenat automobila po menjacu",
+                                        data: values_percents,
+                                        backgroundColor: colors,
+                                        borderColor: colors,
+                                        borderWidth: 1,
+                                    },
+                                ],
+                            },
+                        });
+
+                        current_instance_bar = new Chart(ctx2, {
+                            type: "bar",
+                            responsive: true,
+                            data: {
+                                labels: labels,
+                                datasets: [
+                                    {
+                                        label: "Broj automobila sa menjacem",
+                                        data: values_nums,
+                                        backgroundColor: colors,
+                                        borderColor: colors,
+                                        borderWidth: 1,
+                                    },
+                                ],
+                            },
+                        });
+                    }
+                };
+                xhttp.open("GET", "http://127.0.0.1:5000/automatic_manual_percent_results", true);
+                xhttp.send();
+            }
+
+            function e() {
+ var xhttp;
+                xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        data = JSON.parse(xhttp.responseText);
+                        labels = []
+                        values_percents = []
+                        values_nums = []
+                        colors = []
+                        for (let i = 0; i < data.length; i++){
+                            labels.push(data[i][0])
+                            values_percents.push(data[i][2]);
+                            colors.push(getRandomColor())
+                            values_nums.push(data[i][1])
+                        }
+                        const ctx1 = document.getElementById("pie_chart").getContext("2d");
+                        ctx1.canvas.width = 50;
+                        ctx1.canvas.height = 50;
+
+                        const ctx2 = document.getElementById("bar_chart").getContext("2d");
+                        ctx2.canvas.width = 50;
+                        ctx2.canvas.height = 50;
+
+                        if (current_instance_bar)
+                            current_instance_bar.destroy()
+                        if (current_instance_pie)
+                            current_instance_pie.destroy()
+                        current_instance_pie = new Chart(ctx1, {
+                            type: "pie",
+                            responsive: true,
+                            data: {
+                                labels: labels,
+                                datasets: [
+                                    {
+                                        label: "Procenat automobila po cenovnoj kategoriji",
+                                        data: values_percents,
+                                        backgroundColor: colors,
+                                        borderColor: colors,
+                                        borderWidth: 1,
+                                    },
+                                ],
+                            },
+                        });
+
+                        current_instance_bar = new Chart(ctx2, {
+                            type: "bar",
+                            responsive: true,
+                            data: {
+                                labels: labels,
+                                datasets: [
+                                    {
+                                        label: "Broj automobila po cenovnoj kategoriji",
+                                        data: values_nums,
+                                        borderWidth: 1,
+                                        backgroundColor: colors,
+                                        borderColor: colors,
+                                    },
+                                ],
+                            },
+                        });
+                    }
+                };
+                xhttp.open("GET", "http://127.0.0.1:5000/price_categorization_results", true);
+                xhttp.send();
+            }
+        </script>
+    </body>
+</html>
