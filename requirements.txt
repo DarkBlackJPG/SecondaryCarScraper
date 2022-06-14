@@ -6,3 +6,5 @@ scrapy-rotating-proxies
 psycopg2
 beautifulsoup4
 sqlalchemy
+python-docx
+matplotlib

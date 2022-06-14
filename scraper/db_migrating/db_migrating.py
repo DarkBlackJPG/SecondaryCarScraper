@@ -2,7 +2,7 @@ import psycopg2
 import pandas as pd
 import re
 from sqlalchemy import create_engine
-
+import math
 # establish connections
 conn_string = 'postgresql://postgres:123@127.0.0.1/polovniautomobili'
 
@@ -77,6 +77,12 @@ def update_dataframe_with_ids(dataframe, column_name, id_tuple, value_index = 1)
         dataframe[column_name] = dataframe[column_name].replace(tuple[value_index], tuple[0])
     return dataframe
 
+def clean_up_engine(element):
+    if math.isnan(element):
+        return False
+    # people are fucking retarded and don't know how to fill in simple data
+    return element < 10000
+
 boja_tuple = fetch_id_value_tuple('boja')
 emisiona_klasa_tuple = fetch_id_value_tuple('emisiona_klasa')
 gorivo_tuple = fetch_id_value_tuple('gorivo')
@@ -122,7 +128,7 @@ csv_file['broj_vrata'] = csv_file['broj_vrata'].map(lambda x: x[0])
 csv_file['snaga_kw'] = csv_file['snaga'].map(lambda x: re.findall(only_numbers_regex, x)[0])
 csv_file['snaga_ks'] = csv_file['snaga'].map(lambda x: re.findall(only_numbers_regex, x)[1])
 csv_file['registrovan_do'] = csv_file['registrovan_do'].map(lambda x: x if x != 'Nije registrovan' else float('nan'))
-
+csv_file = csv_file[csv_file['kubikaza'].apply(lambda x: clean_up_engine(x))]
 
 del csv_file['snaga']
 
