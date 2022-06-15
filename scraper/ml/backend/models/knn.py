@@ -1,14 +1,14 @@
 import pandas as pd
 import math
 import numpy as np
-
+from collections import Counter
 
 def manhattan_distance(x, y):
-    return np.linalg.norm(x - y, ord=1)
+    return np.linalg.norm(x - y, ord=1, axis=1)
 
 
 def euclidean_distance(x, y):
-    temp = np.linalg.norm(x - y, ord=2)
+    temp = np.linalg.norm(x - y, ord=2, axis=1)
     return temp
 
 
@@ -36,12 +36,13 @@ class KNN():
     def calculate_distances(self, prediction_data):
         raise NotImplementedError(self.__class__.__name__ + '.try_something')
 
-    # TODO
     def predict(self, prediction_data):
         distances = self.calculate_distances(prediction_data)
-        nearest_neighbors = distances.argsort()[: self.k]
-        nearest_neighbor_price = self.correct_values[nearest_neighbors]
-        return np.bincount(nearest_neighbor_price).argmax()
+        nearest_neighbors = np.argsort(distances)[: self.k]
+        # nearest_neighbor_price = self.correct_values[nearest_neighbors]
+        finding_target = [self.correct_values.iloc[i] for i in nearest_neighbors]
+        most_near_classes = Counter(finding_target).most_common(1)
+        return most_near_classes[0][0]
 
 class EuclideanKNN(KNN):
     def calculate_distances(self,  prediction_data):
