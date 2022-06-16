@@ -1,0 +1,51 @@
+<div class="container">
+    <div class="p-5 mb-4 bg-light rounded-3">
+      <div class="container-fluid py-5">
+        <h1 class="display-5 fw-bold">Procena cene automobila</h1>
+        <p class="col-md-8 fs-4">Sva polja su obavezna.</p>
+        <hr>
+        <div class="container">
+          <div class="row text-center">
+            <div class="col">
+                <select class="form-select" aria-label="Default select example">
+                    <option *ngFor="let i of all_manus" (click)="set_manu(i.id)">{{i.name}}</option>
+                  </select>
+              
+            </div>
+            <div class="col">
+                <select class="form-select" [disabled]="disable_model" aria-label="Default select example">
+                    <option *ngFor="let i of filtered_models" (click)="set_model(i.id)">{{i.name}}</option>
+                  </select>
+            </div>
+            <div class="mb-3">
+              <label for="exampleFormControlInput1" class="form-label">Kilometraza</label>
+              <input type="number" min="0" class="form-control" id="exampleFormControlInput1" [(ngModel)]='kilometraza' placeholder="250000">
+            </div>
+            <div class="mb-3">
+              <label for="exampleFormControlInput1" class="form-label">Godiste</label>
+              <input type="number" min="0" class="form-control" id="exampleFormControlInput1" [(ngModel)]='godiste' placeholder="2012">
+            </div>
+            <div class="mb-3">
+              <label for="exampleFormControlInput1" class="form-label">Kubikaza</label>
+              <input type="number" min="0" class="form-control" id="exampleFormControlInput1" [(ngModel)]='kubikaza' placeholder="1993">
+            </div>
+            <div class="mb-3">
+              <label for="exampleFormControlInput1" class="form-label">Konjskih snaga</label>
+              <input type="number" min="0" class="form-control" id="exampleFormControlInput1" [(ngModel)]='konjskih_snaga' placeholder="113">
+            </div>
+  
+            <button type="button" (click)="search()" class="btn btn-success">Izvrsi procenu</button>
+            
+            <h3 class="display-5 fw-bold">Procenjena cena: </h3> 
+            <h2>22323</h2>
+  
+          </div>
+        </div>
+          
+          
+      </div>
+    </div>
+  
+  </div>
+  
+  <router-outlet></router-outlet>

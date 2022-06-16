@@ -4,8 +4,9 @@ import sys
 
 manufacturer_label_encoded = {}
 model_label_encoded = {}
-stanje_label_encoded = {}
-ostecenje_label_encoded = {}
+
+manufacturer_labels = {}
+model_labels = {}
 
 price_encoded_ranges = [
     (0, 1999),
@@ -23,6 +24,14 @@ def min_max_normalize(df: pd.DataFrame):
 
 def z_score_standardization(series: pd.Series):
     return (series - series.mean()) / series.std()
+
+min_max_input = (-1, -1)
+min_max_output = (-1, -1)
+
+def min_max_denormalize_output(output, normalization_tuple):
+    temp = output + normalization_tuple[0]
+    temp *= (normalization_tuple[1]- normalization_tuple[0]) / 10 # jbg ne znam zasto je 10 puta veci broj
+    return temp
 
 def get_category_id_from_range(price):
     if price < 2000:
@@ -42,31 +51,26 @@ def get_category_id_from_range(price):
     else:
         return 7
 
-def extract_relevant_data_knn(cursor, normalization_method: str):
-    # Generate ids for manu & model
-    cursor.execute('select marka.id from marka')
+def get_manus_models(cursor):
+    cursor.execute("select marka.id, marka.naziv from marka where marka.naziv <> 'Ostalo'")
     results = cursor.fetchall()
     for i, result in enumerate(results):
         manufacturer_label_encoded[result[0]] = i
+        manufacturer_labels[result[0]] = (i, result[1])
 
-    cursor.execute('select model.id from model')
+    cursor.execute("select model.id, model.naziv, model.marka from model join marka on marka.id = model.marka where model.naziv <> 'Ostalo'")
     results = cursor.fetchall()
     for i, result in enumerate(results):
         model_label_encoded[result[0]] = i
+        model_labels[result[0]] = (i, result[1], manufacturer_labels[result[2]][1])
 
-    cursor.execute('select stanje.id from stanje')
-    results = cursor.fetchall()
-    for i, result in enumerate(results):
-        stanje_label_encoded[result[0]] = i
-
-    cursor.execute('select ostecenje.id from ostecenje')
-    results = cursor.fetchall()
-    for i, result in enumerate(results):
-        ostecenje_label_encoded[result[0]] = i
-
+def extract_relevant_data_knn(cursor, normalization_method: str):
+    # Generate ids for manu & model
     # Fetch cars and create dataframe
 
-    cursor.execute('select automobili.model, automobili.marka, automobili.kilometraza, automobili.godiste, automobili.kubikaza, coalesce(automobili.cena_popust, automobili.cena_regularna) as cena from automobili where automobili.model is not null and automobili.marka is not null and automobili.kilometraza is not null and automobili.godiste is not null and automobili.kubikaza is not null')
+    cursor.execute("select automobili.model, automobili.marka, automobili.kilometraza, automobili.godiste, automobili.kubikaza, coalesce(automobili.cena_popust, automobili.cena_regularna) as cena "
+                   "from automobili join model on automobili.model = model.id join marka on automobili.marka = marka.id where automobili.model is not null and automobili.marka is not null and automobili.kilometraza is not null and automobili.godiste is not null and "
+                   "automobili.kubikaza is not null  and coalesce(automobili.cena_popust, automobili.cena_regularna) > 500 and automobili.kilometraza < 500000 and model.naziv <> 'Ostalo' and marka.naziv <> 'Ostalo'")
     results = cursor.fetchall()
 
     df = pd.DataFrame(results, columns=['model', 'marka', 'kilometraza', 'godiste', 'kubikaza', 'cena'])
@@ -85,46 +89,29 @@ def extract_relevant_data_knn(cursor, normalization_method: str):
 
     return data, df['cena']
 
-
-def extract_relevant_data_lin_reg(cursor, normalization_method: str):
+def normalize(df, method):
+    if method == 'minmax':
+     df = min_max_normalize(df)
+    elif method =='z-score':
+        for col in df.columns:
+            df[col] = z_score_standardization(df[col])
+    return df
+def extract_relevant_data_lin_reg(cursor):
     # Generate ids for manu & model
-    cursor.execute('select marka.id from marka')
-    results = cursor.fetchall()
-    for i, result in enumerate(results):
-        manufacturer_label_encoded[result[0]] = i
-
-    cursor.execute('select model.id from model')
-    results = cursor.fetchall()
-    for i, result in enumerate(results):
-        model_label_encoded[result[0]] = i
-
-    cursor.execute('select stanje.id from stanje')
-    results = cursor.fetchall()
-    for i, result in enumerate(results):
-        stanje_label_encoded[result[0]] = i
-
-    cursor.execute('select ostecenje.id from ostecenje')
-    results = cursor.fetchall()
-    for i, result in enumerate(results):
-        ostecenje_label_encoded[result[0]] = i
-
     # Fetch cars and create dataframe
 
-    cursor.execute('select automobili.model, automobili.marka, automobili.kilometraza, automobili.godiste, automobili.kubikaza, coalesce(automobili.cena_popust, automobili.cena_regularna) as cena from automobili where automobili.model is not null and automobili.marka is not null and automobili.kilometraza is not null and automobili.godiste is not null and automobili.kubikaza is not null')
+    cursor.execute("select automobili.model, automobili.marka, automobili.kilometraza, automobili.godiste, automobili.kubikaza, coalesce(automobili.cena_popust, automobili.cena_regularna) as cena, automobili.snaga_ks "
+                   "from automobili join model on automobili.model = model.id join marka on automobili.marka = marka.id "
+                   "where automobili.model is not null and automobili.marka is not null and automobili.kilometraza is not null "
+                   "and automobili.godiste is not null and automobili.kubikaza is not null and coalesce(automobili.cena_popust, automobili.cena_regularna) > 500 and automobili.kilometraza < 500000 and automobili.kilometraza < 500000 and model.naziv <> 'Ostalo' and marka.naziv <> 'Ostalo'")
     results = cursor.fetchall()
 
-    df = pd.DataFrame(results, columns=['model', 'marka', 'kilometraza', 'godiste', 'kubikaza', 'cena'])
+    df = pd.DataFrame(results, columns=['model', 'marka', 'kilometraza', 'godiste', 'kubikaza', 'cena', 'snaga_ks'])
 
     df['model'] = df['model'].apply(lambda x: model_label_encoded[x])
     df['marka'] = df['marka'].apply(lambda x: manufacturer_label_encoded[x])
     df['godiste'] = df['godiste'].astype('int32')
     df['cena'] = df['cena'].astype('int32')
     data = df.drop(['cena'], axis=1)
-
-    if normalization_method == 'minmax':
-     data = min_max_normalize(data)
-    elif normalization_method =='z-score':
-        for col in data.columns:
-            data[col] = z_score_standardization(data[col])
-
+    print(data.head())
     return data, df['cena']
