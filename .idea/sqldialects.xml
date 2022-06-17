@@ -3,7 +3,6 @@
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/scraper/db_migrating/db_migrating.py" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/scraper/db_migrating/db_truncate_all.py" dialect="PostgreSQL" />
-    <file url="file://$PROJECT_DIR$/scraper/db_migrating/pg_dump/2022_06_12_21_04_09-polovniautomobili-dump.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/scraper/ml/backend/data_prep/data_prep.py" dialect="PostgreSQL" />
   </component>
 </project>

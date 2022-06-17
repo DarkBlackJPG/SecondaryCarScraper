@@ -1,17 +1,8 @@
 from data_prep import data_prep
-from models import knn
 from models import lin_reg
-import matplotlib.pyplot as plt
 import psycopg2
-from flask import Flask, Response, jsonify, request
-from flask_cors import CORS
-import pandas as pd
 from sklearn.model_selection import train_test_split
-import seaborn as sb # visualizations
-from sklearn.metrics import accuracy_score
-
-from sklearn.linear_model import Ridge, LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import r2_score
 
 conn = psycopg2.connect("dbname=polovniautomobili user=postgres password=123")
 cur = conn.cursor()

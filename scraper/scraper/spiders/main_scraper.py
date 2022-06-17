@@ -15,7 +15,7 @@ class main_scraper(scrapy.Spider):
     def __init__(self):
         self.start_time = time.time()
         timestr = time.strftime("%Y%m%d-%H%M%S")
-        self.filename = f'polovni_automobili_database_{timestr}.csv'
+        self.filename = f'polovni_automobili_database.csv'
         with open(self.filename, 'w', encoding="utf-8") as csvfile:
             filewriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             filewriter.writerow([

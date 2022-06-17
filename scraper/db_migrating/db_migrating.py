@@ -19,7 +19,7 @@ def execute_insert(field_name, table_name, elements):
         cur.execute("INSERT INTO public." + table_name + " (" + field_name + ") VALUES (%(element)s) ON CONFLICT DO NOTHING", {'element': element})
     conn.commit()
 
-csv_file = pd.read_csv('../polovni_automobili_database_20220612-152247_formatted_data.csv')
+csv_file = pd.read_csv('../polovni_automobili_database_formatted_data.csv')
 
 boja_eksterijer = csv_file['boja_eksterijer'].unique()
 boja_enterijer = csv_file['boja_enterijer'].unique()

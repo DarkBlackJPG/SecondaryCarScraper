@@ -3,7 +3,6 @@ import re
 
 def extract_number(cena):
     only_numbers_regex = r'([0-9\.]+)'
-    cena_extracted = 0
     if type(cena) is float:
         return float('nan')
     try:
@@ -16,9 +15,7 @@ def extract_number(cena):
         print('error')
 
 def format_data():
-    #csv_file = pd.read_csv('../polovni_automobili_database_20220612-152247.csv')
-    #csv_file.to_csv('../polovni_automobili_database_20220612-152247_removed_newlines.csv', index=False)
-    csv_file = pd.read_csv('../polovni_automobili_database_20220612-152247_removed_newlines.csv')
+    csv_file = pd.read_csv('../polovni_automobili_database_removed_newlines.csv')
 
     cena_popust = csv_file['cena_popust']
     cena_regularna = csv_file['cena_regularna']
@@ -36,7 +33,7 @@ def format_data():
         print(row)
         print('==================')
 
-    csv_file.to_csv('../polovni_automobili_database_20220612-152247_formatted_data.csv', index=False)
+    csv_file.to_csv('../polovni_automobili_database_formatted_data.csv', index=False)
 
 
 
