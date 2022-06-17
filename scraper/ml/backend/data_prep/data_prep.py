@@ -64,42 +64,19 @@ def get_manus_models(cursor):
         model_label_encoded[result[0]] = i
         model_labels[result[0]] = (i, result[1], manufacturer_labels[result[2]][1])
 
-def extract_relevant_data_knn(cursor, normalization_method: str):
-    # Generate ids for manu & model
-    # Fetch cars and create dataframe
-
-    cursor.execute("select automobili.model, automobili.marka, automobili.kilometraza, automobili.godiste, automobili.kubikaza, coalesce(automobili.cena_popust, automobili.cena_regularna) as cena "
-                   "from automobili join model on automobili.model = model.id join marka on automobili.marka = marka.id where automobili.model is not null and automobili.marka is not null and automobili.kilometraza is not null and automobili.godiste is not null and "
-                   "automobili.kubikaza is not null  and coalesce(automobili.cena_popust, automobili.cena_regularna) > 500 and automobili.kilometraza < 500000 and model.naziv <> 'Ostalo' and marka.naziv <> 'Ostalo'")
-    results = cursor.fetchall()
-
-    df = pd.DataFrame(results, columns=['model', 'marka', 'kilometraza', 'godiste', 'kubikaza', 'cena'])
-
-    df['model'] = df['model'].apply(lambda x: model_label_encoded[x])
-    df['marka'] = df['marka'].apply(lambda x: manufacturer_label_encoded[x])
-    df['godiste'] = df['godiste'].astype('int32')
-    df['cena'] = df['cena'].apply(lambda x: get_category_id_from_range(x))
-    data = df.drop(['cena'], axis=1)
-
-    if normalization_method == 'minmax':
-     data = min_max_normalize(data)
-    elif normalization_method =='z-score':
-        for col in data.columns:
-            data[col] = z_score_standardization(data[col])
-
-    return data, df['cena']
+def extract_relevant_data_knn(cursor):
+    data, price = extract_relevant_data_lin_reg(cursor)
+    data = data.drop(['snaga_ks'], axis=1)
+    return data, price.apply(lambda x: get_category_id_from_range(x))
 
 def normalize(df, method):
     if method == 'minmax':
      df = min_max_normalize(df)
-    elif method =='z-score':
+    elif method == 'z-score':
         for col in df.columns:
             df[col] = z_score_standardization(df[col])
     return df
 def extract_relevant_data_lin_reg(cursor):
-    # Generate ids for manu & model
-    # Fetch cars and create dataframe
-
     cursor.execute("select automobili.model, automobili.marka, automobili.kilometraza, automobili.godiste, automobili.kubikaza, coalesce(automobili.cena_popust, automobili.cena_regularna) as cena, automobili.snaga_ks "
                    "from automobili join model on automobili.model = model.id join marka on automobili.marka = marka.id "
                    "where automobili.model is not null and automobili.marka is not null and automobili.kilometraza is not null "
@@ -113,5 +90,5 @@ def extract_relevant_data_lin_reg(cursor):
     df['godiste'] = df['godiste'].astype('int32')
     df['cena'] = df['cena'].astype('int32')
     data = df.drop(['cena'], axis=1)
-    print(data.head())
+
     return data, df['cena']

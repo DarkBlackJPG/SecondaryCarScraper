@@ -58,31 +58,26 @@ def lin():
     pl = lin.predict(lin_reg_data_test)
     print(pl[:5].tolist())
     print(mean_squared_error(lin_reg_res_test, pl))
-    # print(lin_reg_res_test.to_list())
+
     print('----------')
-    lr = lin_reg.LinearRegression(lin_reg_data_train, lin_reg_res_train, 0.05, 10000)
+    lr = lin_reg.LinearRegression(lin_reg_data_train, lin_reg_res_train, 0.05, 10000, 0.01)
     lr.fit(lin_reg_data_train, lin_reg_res_train)
     predictions = lr.predict(lin_reg_data_test)
-
-    # aa = data_prep.min_max_denormalize_output(predictions, data_prep.min_max_output)
-    # aaa = data_prep.min_max_denormalize_output(lin_reg_res_test, data_prep.min_max_output)
-
+    lr.save_weights('naa')
+    lr.read_weights(f'naa_feature_num_{lr.cols}.lrw')
     print(predictions[:5].tolist())
     print(mean_squared_error(lin_reg_res_test, predictions))
 
 conn = psycopg2.connect("dbname=polovniautomobili user=postgres password=123")
 cur = conn.cursor()
 
-data_prep.get_manus_models(cur)
-
 lin()
-knnf()
 
+data_prep.get_manus_models(cur)
+lin()
 cur.close()
 conn.close()
-
 exit()
-
 app = Flask(__name__)
 CORS(app)
 
