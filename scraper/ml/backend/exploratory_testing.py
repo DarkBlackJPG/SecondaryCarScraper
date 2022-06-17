@@ -7,7 +7,7 @@ import seaborn as sb  # visualizations
 from sklearn.metrics import accuracy_score, r2_score, mean_squared_log_error
 import os
 import matplotlib.pyplot as plt
-
+import pandas as pd
 
 
 
@@ -69,19 +69,19 @@ cur.close()
 conn.close()
 
 lin_reg_data_normalized = data_prep.normalize(lin_reg_data, 'minmax')
-# knn_data_normalized = data_prep.normalize(knn_data, 'z-score')
-#
-# colors = sb.color_palette("husl", 8)
-# sb.pairplot(data=pd.concat([knn_data_normalized, pd.DataFrame(knn_result)], axis=1), hue='cena', palette=colors)
-# plt.savefig('./exploratory_testing_results/KNN_data_distribution.png')
+knn_data_normalized = data_prep.normalize(knn_data, 'z-score')
+
+colors = sb.color_palette("husl", 8)
+sb.pairplot(data=pd.concat([knn_data_normalized, pd.DataFrame(knn_result)], axis=1), hue='cena', palette=colors)
+plt.savefig('./exploratory_testing_results/KNN_data_distribution.png')
 
 # KNN
-# knn_data_train, knn_data_test, knn_result_train, knn_result_test = train_test_split(knn_data, knn_result,
-#                                                                                     test_size=0.33)
-# model = knn.EuclideanKNN(knn_data_train, knn_result_train)
-# KNN(model, knn_data_test, knn_result_test, "EUCLIDEAN MODEL")
-# model = knn.ManhattanKNN(knn_data_train, knn_result_train)
-# KNN(model, knn_data_test, knn_result_test, "MANHATTAN MODEL")
+knn_data_train, knn_data_test, knn_result_train, knn_result_test = train_test_split(knn_data, knn_result,
+                                                                                    test_size=0.33)
+model = knn.EuclideanKNN(knn_data_train, knn_result_train)
+KNN(model, knn_data_test, knn_result_test, "EUCLIDEAN MODEL")
+model = knn.ManhattanKNN(knn_data_train, knn_result_train)
+KNN(model, knn_data_test, knn_result_test, "MANHATTAN MODEL")
 
 # Ridge Regression
 

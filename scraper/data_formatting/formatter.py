@@ -14,6 +14,18 @@ def extract_number(cena):
     except:
         print('error')
 
+def format_serbian(x: str):
+    if type(x) == float:
+        return None
+    reg = '(.*)\(.*\)'
+    x = x.lower()
+    x = x.replace('š', 's').replace('č', 'c').replace('ć', 'c').replace('ž', 'z').replace('đ', 'dj')
+    t = re.findall(reg, x)
+    if len(t) == 1:
+        return t[0]
+    else:
+        return x
+
 def format_data():
     csv_file = pd.read_csv('../polovni_automobili_database_removed_newlines.csv')
 
@@ -21,7 +33,7 @@ def format_data():
     cena_regularna = csv_file['cena_regularna']
     kilometraza = csv_file['kilometraza']
     kubikaza = csv_file['kubikaza']
-
+    csv_file['grad'] = csv_file['grad'].apply(lambda x: format_serbian(x))
     csv_file['cena_popust'] = cena_popust.apply(lambda x: extract_number(x))
     csv_file['cena_regularna'] = cena_regularna.apply(lambda x: extract_number(x))
     csv_file['kilometraza'] = kilometraza.apply(lambda x: extract_number(x))
