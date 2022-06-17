@@ -27,11 +27,9 @@ def format_data():
     csv_file['kilometraza'] = kilometraza.apply(lambda x: extract_number(x))
     csv_file['kubikaza'] = kubikaza.apply(lambda x: extract_number(x))
 
-    for idx, row in csv_file.iterrows():
-        if idx == 2:
-            break
-        print(row)
-        print('==================')
+    # Totally retarded record ------
+    csv_file = csv_file.drop(csv_file[csv_file['broj_oglasa'] == 8292270].index)
+    # ------------------------------
 
     csv_file.to_csv('../polovni_automobili_database_formatted_data.csv', index=False)
 

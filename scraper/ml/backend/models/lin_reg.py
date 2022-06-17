@@ -4,6 +4,7 @@ import numpy as np
 import pickle
 from sklearn.metrics import mean_squared_error, r2_score
 
+
 # Python imports allude me, had to copy
 def min_max_normalize(df: pd.DataFrame, df_min=None, df_max=None):
     if df_min is None:
@@ -22,7 +23,8 @@ def z_score_standardization(series: pd.Series, df_mean=None, df_std=None):
 
     return (series - df_mean) / df_std
 
-class LinearRegression():
+
+class LinearRegression:
     def __init__(self
                  , dataset: pd.DataFrame = None
                  , expected_values: pd.Series = None
@@ -51,12 +53,14 @@ class LinearRegression():
         self.w = np.zeros(self.cols)
         self.b = 0
 
-    # TODO Reformat
     def fit(self, training_set: pd.DataFrame, training_set_vals: pd.Series):
         for i in range(0, self.iterations):
-            Y_pred = self.predict(training_set)
-            dW = (-(2 * (training_set.T).dot(training_set_vals - Y_pred)) + (2 * self.regularization * self.w)) / self.m
-            db = -2 * np.sum(training_set_vals - Y_pred) / self.m
+            hx = self.predict(training_set)
+            error = training_set_vals - hx
+            e_ix_i = training_set.T.dot(error)
+            regularization = (2 * self.regularization * self.w)
+            dW = (-(2 * e_ix_i) + regularization) / self.m
+            db = -2 * np.sum(error) / self.m
             self.w = self.w - self.alpha * dW
             self.b = self.b - self.alpha * db
 
@@ -76,7 +80,7 @@ class LinearRegression():
         self.max_standardization = max_standardization
 
     def add_z_score_parameters(self, std_deviation, mean_deviation):
-        self.std_deviation  = std_deviation
+        self.std_deviation = std_deviation
         self.mean_deviation = mean_deviation
 
     def save_weights(self, filename):

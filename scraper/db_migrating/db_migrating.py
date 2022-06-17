@@ -83,6 +83,7 @@ def clean_up_engine(element):
     # people are fucking retarded and don't know how to fill in simple data
     return element < 10000
 
+
 boja_tuple = fetch_id_value_tuple('boja')
 emisiona_klasa_tuple = fetch_id_value_tuple('emisiona_klasa')
 gorivo_tuple = fetch_id_value_tuple('gorivo')
@@ -123,8 +124,9 @@ csv_file['fiksna_cena'] = csv_file['fiksna_cena'].replace('NE', 0).replace('DA',
 csv_file['zamena'] = csv_file['zamena'].replace('NE', 0).replace('DA', 1)
 csv_file['snaga_ks'] = 0
 csv_file['snaga_kw'] = 0
-csv_file['broj_sedista'] = csv_file['broj_sedista'].map(lambda x: x[0])
-csv_file['broj_vrata'] = csv_file['broj_vrata'].map(lambda x: x[0])
+
+csv_file['broj_sedista'] = csv_file['broj_sedista'].map(lambda x: x[0] if type(x) is not float else float('nan'))
+csv_file['broj_vrata'] = csv_file['broj_vrata'].map(lambda x: x[0] if type(x) is not float else float('nan'))
 csv_file['snaga_kw'] = csv_file['snaga'].map(lambda x: re.findall(only_numbers_regex, x)[0])
 csv_file['snaga_ks'] = csv_file['snaga'].map(lambda x: re.findall(only_numbers_regex, x)[1])
 csv_file['registrovan_do'] = csv_file['registrovan_do'].map(lambda x: x if x != 'Nije registrovan' else float('nan'))
