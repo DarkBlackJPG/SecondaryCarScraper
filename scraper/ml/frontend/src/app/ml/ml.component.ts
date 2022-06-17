@@ -17,10 +17,13 @@ export class MlComponent implements OnInit {
 
   filtered_models: any = [];
 
-  result = 0;
+  result:string = '';
 
   model:any = null;
   marka:any = null;
+  model_encoded:any = null;
+  marka_encoded:any = null;
+
   kilometraza = null;
   godiste = null;
   kubikaza = null;
@@ -33,6 +36,7 @@ export class MlComponent implements OnInit {
           this.all_models.push(
             {
               'id': attribute,
+              'encoded': resp[attribute][0],
               'name': resp[attribute][1],
               'manu': resp[attribute][2]
             }
@@ -49,6 +53,7 @@ export class MlComponent implements OnInit {
         this.all_manus.push(
           {
             'id': attribute,
+            'encoded': resp[attribute][0],
             'name': resp[attribute][1]
           }
         )
@@ -67,17 +72,35 @@ export class MlComponent implements OnInit {
     })
   }
 
-  set_manu(id: any) {
+  set_manu(id: any, encoded: any) {
     this.disable_model = false
     this.marka = id
+    this.marka_encoded = encoded
     this.filter_models()
   }
-  set_model(id: any) {
+  set_model(id: any, encoded: any) {
     this.model = id
+    this.model_encoded = encoded
   }
   search() {
-    this.result = this.fetchService.execute_query(this.model, this.marka, this.kilometraza, this.godiste, this.kubikaza, this.konjskih_snaga).subscribe((res: any) => {
 
+    if (this.model_encoded == null
+    || this.marka_encoded == null
+    || this.kilometraza == null
+    || this.godiste == null
+    || this.kubikaza == null
+    || this.konjskih_snaga == null) {
+      alert('Sva polja su obavezna')
+      return
+    }
+
+    const formatter = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    this.fetchService.execute_query(this.model_encoded, this.marka_encoded, this.kilometraza, this.godiste, this.kubikaza, this.konjskih_snaga).subscribe((res: any) => {
+      console.log(res);
+      this.result =  formatter.format(res.result) + '€'
     })
   }
 }

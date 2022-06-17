@@ -13,6 +13,8 @@ from sklearn.metrics import accuracy_score
 from sklearn.linear_model import Ridge, LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 
+import os
+
 def knnf():
     knn_data, knn_result = data_prep.extract_relevant_data_knn(cur, 'minmax')
 
@@ -37,7 +39,7 @@ def knnf():
 
 def lin():
     lin_reg_data, lin_reg_result = data_prep.extract_relevant_data_lin_reg(cur)
-    data_prep.min_max_input = (lin_reg_data.min(), lin_reg_data.max())
+    # data_prep.min_max_input = (lin_reg_data.min(), lin_reg_data.max())
     # data_prep.min_max_output = (lin_reg_result.min(), lin_reg_result.max())
     lin_reg_data_normalized, lin_reg_result_normalized = data_prep.normalize(lin_reg_data,
                                                                              'minmax'), data_prep.normalize(
@@ -71,13 +73,26 @@ def lin():
 conn = psycopg2.connect("dbname=polovniautomobili user=postgres password=123")
 cur = conn.cursor()
 
-lin()
+data_prep.get_manus_models(cur) # Must be run, otherwise won't work
 
-data_prep.get_manus_models(cur)
-lin()
+lin_reg_weights = None
+
+for File in os.listdir('.'):
+    if File.endswith('.lrw'):
+        lin_reg_weights = File.title().lower()
+
+if lin_reg_weights is None:
+    print('Run prepare_lin_regression_for_app.py first, then run server!')
+    exit()
+
+linear_regression_model = lin_reg.LinearRegression()
+linear_regression_model.read_weights(lin_reg_weights)
+
+print('Server loaded the model')
+
 cur.close()
 conn.close()
-exit()
+
 app = Flask(__name__)
 CORS(app)
 
@@ -91,8 +106,35 @@ def fetch_all_manufacturers():
 
 @app.route('/execute_query', methods = ['POST'])
 def execute_query():
-    print(request.form.get('test'))
-    return jsonify({"a":"aa"})
+    # this should receive the correct values!!
+    model = int(request.json['model'])
+    marka = int(request.json['marka'])
+    kilometraza = int(request.json['kilometraza'])
+    godiste = int(request.json['godiste'])
+    kubikaza = int(request.json['kubikaza'])
+    konjskih_snaga = int(request.json['konjskih_snaga'])
+
+    df = pd.DataFrame(columns=[
+        'model',
+        'marka',
+        'kilometraza',
+        'godiste',
+        'kubikaza',
+        'snaga_ks'
+    ])
+
+    df['model'] = [model]
+    df['marka'] = [marka]
+    df['kilometraza'] = [kilometraza]
+    df['godiste'] = [godiste]
+    df['kubikaza'] = [kubikaza]
+    df['snaga_ks'] = [konjskih_snaga]
+
+    print(df.head())
+
+    prediction = linear_regression_model.predict_with_minmax(df)
+    print(prediction)
+    return jsonify({ "result" : abs(prediction.tolist()[0])})
 
 if __name__ == "__main__":
     app.run(debug=True) #start the webserver

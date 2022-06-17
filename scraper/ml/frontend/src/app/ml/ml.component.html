@@ -8,13 +8,13 @@
           <div class="row text-center">
             <div class="col">
                 <select class="form-select" aria-label="Default select example">
-                    <option *ngFor="let i of all_manus" (click)="set_manu(i.id)">{{i.name}}</option>
+                    <option *ngFor="let i of all_manus" (click)="set_manu(i.id, i.encoded)">{{i.name}}</option>
                   </select>
               
             </div>
             <div class="col">
                 <select class="form-select" [disabled]="disable_model" aria-label="Default select example">
-                    <option *ngFor="let i of filtered_models" (click)="set_model(i.id)">{{i.name}}</option>
+                    <option *ngFor="let i of filtered_models" (click)="set_model(i.id, i.encoded)">{{i.name}}</option>
                   </select>
             </div>
             <div class="mb-3">
@@ -37,7 +37,7 @@
             <button type="button" (click)="search()" class="btn btn-success">Izvrsi procenu</button>
             
             <h3 class="display-5 fw-bold">Procenjena cena: </h3> 
-            <h2>22323</h2>
+            <h2>{{result}}</h2>
   
           </div>
         </div>

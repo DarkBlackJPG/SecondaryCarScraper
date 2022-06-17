@@ -18,7 +18,7 @@ def KNN(model, knn_data_test, knn_result_test, model_name):
 
     default_k = model.k
 
-    with open('knn_testing_log.txt', 'a') as fle:
+    with open('./exploratory_testing_results/knn_testing_log.txt', 'a') as fle:
         print(f'{model_name}')
         fle.writelines([f'{model_name}\n'])
         print(f'Default k: {default_k}')
@@ -49,7 +49,7 @@ def KNN(model, knn_data_test, knn_result_test, model_name):
         accuracy_list.append(accuracy_original)
         plt.clf()
         plt.plot(_range, accuracy_list)
-        plt.savefig(f'{model_name}_accuracy.png')
+        plt.savefig(f'./exploratory_testing_results/{model_name}_accuracy.png')
         print(f'Best accuracy for k[{best_k}]: {best_acc}\n')
         fle.writelines([f'Best accuracy for k[{best_k}]: {best_acc}\n'])
 
@@ -70,7 +70,7 @@ knn_data_normalized = data_prep.normalize(knn_data, 'z-score')
 
 colors = sb.color_palette("husl", 8)
 sb.pairplot(data=pd.concat([knn_data_normalized, pd.DataFrame(knn_result)], axis=1), hue='cena', palette=colors)
-plt.savefig('KNN_data_distribution.png')
+plt.savefig('./exploratory_testing_results/KNN_data_distribution.png')
 
 # KNN
 knn_data_train, knn_data_test, knn_result_train, knn_result_test = train_test_split(knn_data, knn_result,
@@ -86,11 +86,13 @@ KNN(model, knn_data_test, knn_result_test, "MANHATTAN MODEL")
 ridge_data_train, ridge_data_test, ridge_result_train, ridge_result_test = train_test_split(lin_reg_data_normalized, lin_reg_result,
                                                                                         test_size=0.33)
 
+# TODO Use Cross-Validation
+
 possible_regularization = [0.1, 0.5, 0.01, 0.05, 0.001]
 possible_lr = [0.1, 0.5, 0.01, 0.05, 0.001]
 iterations = [50, 100, 1000, 5000, 10000]
 
-with open('linear_regression_log.csv', 'a') as fil:
+with open('./exploratory_testing_results/linear_regression_log.csv', 'a') as fil:
 
     print('Ridge regression')
     print('Regularization value\tLearning rate value\tIterations value\tR2')
